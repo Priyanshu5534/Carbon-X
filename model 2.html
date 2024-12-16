@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Machinery Efficiency & Carbon Emission Chatbot</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-image: url('https://images.unsplash.com/photo-1579800628091-7d9a74496c02');
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            color: #333;
+        }
+
+        .chatbot-container {
+            width: 400px;
+            max-width: 90%;
+            background: rgba(255, 255, 255, 0.85);
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+            display: flex;
+            flex-direction: column;
+            height: 600px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .chat-header {
+            background-color: #333;
+            padding: 15px;
+            text-align: center;
+            color: white;
+            font-size: 18px;
+            font-weight: bold;
+            border-top-left-radius: 10px;
+            border-top-right-radius: 10px;
+        }
+
+        .chat-body {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+            background-color: #f7f7f7;
+        }
+
+        .chat-input {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            padding: 10px;
+            border-top: 1px solid #ccc;
+            background-color: #f1f1f1;
+        }
+
+        .chat-input input {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            width: 100%;
+        }
+
+        .chat-input button {
+            padding: 10px 15px;
+            margin-top: 10px;
+            background-color: #333;
+            border: none;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+            align-self: flex-end;
+        }
+
+        .chat-input button:hover {
+            background-color: #555;
+        }
+
+        .bot-message, .user-message {
+            margin-bottom: 15px;
+        }
+
+        .bot-message p, .user-message p {
+            padding: 10px;
+            border-radius: 10px;
+        }
+
+        .bot-message {
+            background-color: #e0e0e0;
+            align-self: flex-start;
+        }
+
+        .user-message {
+            background-color: #333;
+            color: white;
+            align-self: flex-end;
+        }
+
+        .autocomplete-items {
+            position: absolute;
+            border: 1px solid #d4d4d4;
+            border-top: none;
+            z-index: 99;
+            top: 50px; /* Position below the input field */
+            left: 0;
+            right: 0;
+            max-height: 150px;
+            overflow-y: auto;
+            background-color: white;
+            border-radius: 5px;
+        }
+
+        .autocomplete-items div {
+            padding: 10px;
+            cursor: pointer;
+        }
+
+        .autocomplete-items div:hover {
+            background-color: #e9e9e9;
+        }
+    </style>
+</head>
+<body>
+    <div class="chatbot-container">
+        <div class="chat-header">
+            <h2>Machinery Efficiency & Carbon Emission Bot</h2>
+        </div>
+        <div class="chat-body" id="chatBody">
+            <div class="bot-message">
+                <p>Welcome! Please enter the type of machinery, location, and its efficiency to predict its impact on carbon emissions.</p>
+            </div>
+        </div>
+        <div class="chat-input">
+            <input type="text" id="userInput" placeholder="Enter machinery type, location, efficiency...">
+            <div id="autocomplete-list" class="autocomplete-items"></div>
+            <button id="sendBtn">Send</button>
+        </div>
+    </div>
+
+    <script>
+        const chatBody = document.getElementById('chatBody');
+        const userInput = document.getElementById('userInput');
+        const sendBtn = document.getElementById('sendBtn');
+        const autocompleteList = document.getElementById('autocomplete-list');
+
+        const machineryData = [
+            { type: "Excavator", location: "Jharia", efficiency: 75, baseEmission: 5000 },
+            { type: "Loader", location: "Singrauli", efficiency: 80, baseEmission: 3000 },
+            { type: "Dump Truck", location: "Raniganj", efficiency: 70, baseEmission: 7000 },
+            { type: "Bulldozer", location: "Korba", efficiency: 90, baseEmission: 6000 },
+            { type: "Shovel", location: "Dhanbad", efficiency: 65, baseEmission: 5500 },
+            { type: "Drill", location: "Talcher", efficiency: 85, baseEmission: 4000 },
+            { type: "Conveyor Belt", location: "Neyveli", efficiency: 88, baseEmission: 1600 },
+            { type: "Bulldozer", location: "Jharia", efficiency: 60, baseEmission: 5500 },
+            { type: "Loader", location: "Korba", efficiency: 82, baseEmission: 4200 },
+    { type: "Excavator", location: "Singrauli", efficiency: 78, baseEmission: 4800 }
+
+            // Add more machinery data as needed
+        ];
+
+        function displayMessage(message, sender = 'bot') {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = sender === 'bot' ? 'bot-message' : 'user-message';
+            const messagePara = document.createElement('p');
+            messagePara.innerHTML = message;
+            messageDiv.appendChild(messagePara);
+            chatBody.appendChild(messageDiv);
+            chatBody.scrollTop = chatBody.scrollHeight;
+        }
+
+        function handleUserInput() {
+            const input = userInput.value.trim();
+            if (input === "") return;
+            displayMessage(input, 'user');
+            userInput.value = "";
+
+            const [machineryType, location, efficiencyInput] = input.split(",").map(item => item.trim().toLowerCase());
+
+            const machinery = machineryData.find(item => 
+                item.type.toLowerCase() === machineryType && 
+                item.location.toLowerCase() === location
+            );
+
+            if (machinery) {
+                const inputEfficiency = parseFloat(efficiencyInput);
+                const efficiencyFactor = machinery.efficiency / inputEfficiency;
+                const predictedEmission = machinery.baseEmission * efficiencyFactor;
+
+                let response = `<strong>Machinery Type:</strong> ${machinery.type}<br>
+                                <strong>Location:</strong> ${machinery.location}<br>
+                                <strong>Base Emission:</strong> ${machinery.baseEmission} tons/year<br>
+                                <strong>Predicted Emission with ${efficiencyInput}% efficiency:</strong> ${predictedEmission.toFixed(2)} tons/year`;
+
+                displayMessage(response);
+            } else {
+                displayMessage("Sorry, I couldn't find the data for the given input. Please try again.");
+            }
+        }
+
+        function handleAutocomplete() {
+            const input = userInput.value.trim().toLowerCase();
+            autocompleteList.innerHTML = "";
+            if (!input) return;
+
+            const suggestions = new Set();
+            machineryData.forEach(item => {
+                if (item.type.toLowerCase().startsWith(input) || item.location.toLowerCase().startsWith(input)) {
+                    suggestions.add(item.type);
+                    suggestions.add(item.location);
+                }
+            });
+
+            suggestions.forEach(suggestion => {
+                const div = document.createElement('div');
+                div.innerHTML = suggestion.charAt(0).toUpperCase() + suggestion.slice(1);
+                div.addEventListener('click', function () {
+                    userInput.value = suggestion;
+                    autocompleteList.innerHTML = "";
+                    userInput.focus();
+                });
+                autocompleteList.appendChild(div);
+            });
+        }
+
+        sendBtn.addEventListener('click', handleUserInput);
+        userInput.addEventListener('input', handleAutocomplete);
+        userInput.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter') {
+                handleUserInput();
+            }
+        });
+    </script>
+</body>
+</html>

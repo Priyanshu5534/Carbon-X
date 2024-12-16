@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coal Mine Carbon Footprint Chatbot</title>
+    <style>
+        /* Basic reset for consistent cross-browser rendering */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-image: url('https://images.unsplash.com/photo-1724921983194-d74f208a62f4?q=80&w=3026&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'); /* Replace with your background image */
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            color: #333;
+        }
+
+        /* Container for the chatbot */
+        .chatbot-container {
+            width: 400px;
+            max-width: 90%;
+            background: rgba(255, 255, 255, 0.85);
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+            display: flex;
+            flex-direction: column;
+            height: 600px;
+            overflow: hidden;
+        }
+
+        /* Header of the chatbot */
+        .chat-header {
+            background-color: #4CAF50;
+            padding: 15px;
+            text-align: center;
+            color: white;
+            font-size: 18px;
+            font-weight: bold;
+            border-top-left-radius: 10px;
+            border-top-right-radius: 10px;
+        }
+
+        /* Main chat body where messages are displayed */
+        .chat-body {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+            background-color: #f7f7f7;
+        }
+
+        /* Input area for user to type messages */
+        .chat-input {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            padding: 10px;
+            border-top: 1px solid #ccc;
+            background-color: #f1f1f1;
+        }
+
+        .chat-input input {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        .chat-input button {
+            padding: 10px 15px;
+            margin-top: 10px;
+            background-color: #4CAF50;
+            border: none;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+            align-self: flex-end;
+        }
+
+        .chat-input button:hover {
+            background-color: #45a049;
+        }
+
+        /* Styling for bot and user messages */
+        .bot-message, .user-message {
+            margin-bottom: 15px;
+        }
+
+        .bot-message p, .user-message p {
+            padding: 10px;
+            border-radius: 10px;
+        }
+
+        .bot-message {
+            background-color: #e0e0e0;
+            align-self: flex-start;
+        }
+
+        .user-message {
+            background-color: #4CAF50;
+            color: white;
+            align-self: flex-end;
+        }
+
+        /* Autocomplete dropdown */
+        .autocomplete-items {
+            position: absolute;
+            border: 1px solid #d4d4d4;
+            border-top: none;
+            z-index: 99;
+            top: 40px; /* Position below the input field */
+            left: 0;
+            right: 0;
+            max-height: 150px;
+            overflow-y: auto;
+            background-color: white;
+        }
+
+        .autocomplete-items div {
+            padding: 10px;
+            cursor: pointer;
+        }
+
+        .autocomplete-items div:hover {
+            background-color: #e9e9e9;
+        }
+    </style>
+</head>
+<body>
+    <div class="chatbot-container">
+        <div class="chat-header">
+            <h2>Carbon Footprint Chatbot</h2>
+        </div>
+        <div class="chat-body" id="chatBody">
+            <div class="bot-message">
+                <p>Hello! Please enter the coal mine location in India:</p>
+            </div>
+        </div>
+        <div class="chat-input">
+            <input type="text" id="userInput" placeholder="Type location..." autocomplete="off">
+            <div id="autocomplete-list" class="autocomplete-items"></div>
+            <button id="sendBtn">Send</button>
+        </div>
+    </div>
+
+    <script>
+        // Expanded dataset - Add more locations for a comprehensive list
+        const coalMineData = [
+            {
+                location: "Jharia",
+                carbonFootprint: {
+                    yearly: "500,000 tons",
+                    monthly: "41,667 tons",
+                    daily: "1,369 tons"
+                },
+                processes: [
+                    "Coal extraction",
+                    "Transportation",
+                    "Processing",
+                    "Storage"
+                ],
+                alternatives: [
+                    "Implementing carbon capture and storage (CCS)",
+                    "Switching to renewable energy sources for processing",
+                    "Improving transportation efficiency"
+                ]
+            },
+            {
+                location: "Singrauli",
+                carbonFootprint: {
+                    yearly: "750,000 tons",
+                    monthly: "62,500 tons",
+                    daily: "2,054 tons"
+                },
+                processes: [
+                    "Open-pit mining",
+                    "Coal washing",
+                    "Power generation",
+                    "Emissions from machinery"
+                ],
+                alternatives: [
+                    "Adopting electric machinery",
+                    "Using alternative materials for construction",
+                    "Enhancing waste management practices"
+                ]
+            },
+            {
+                location: "Raniganj",
+                carbonFootprint: {
+                    yearly: "600,000 tons",
+                    monthly: "50,000 tons",
+                    daily: "1,644 tons"
+                },
+                processes: [
+                    "Underground mining",
+                    "Ventilation systems",
+                    "Coal handling",
+                    "Energy consumption"
+                ],
+                alternatives: [
+                    "Improving ventilation efficiency",
+                    "Introducing energy-efficient systems",
+                    "Recycling waste materials"
+                ]
+            },
+            {
+                location: "Korba",
+                carbonFootprint: {
+                    yearly: "1,200,000 tons",
+                    monthly: "100,000 tons",
+                    daily: "3,288 tons"
+                },
+                processes: [
+                    "Surface mining",
+                    "Coal transport",
+                    "Processing plants",
+                    "Energy consumption"
+                ],
+                alternatives: [
+                    "Switching to low-carbon transport methods",
+                    "Using solar power for processing plants",
+                    "Reducing energy consumption in mining operations"
+                ]
+            },
+            
+            {
+                location: "Talcher",
+                carbonFootprint: {
+                    yearly: "900,000 tons",
+                    monthly: "75,000 tons",
+                    daily: "2,466 tons"
+                },
+                processes: [
+                    "Open-pit mining",
+                    "Coal beneficiation",
+                    "Coal-fired power plants",
+                    "Industrial emissions"
+                ],
+                alternatives: [
+                    "Shifting to cleaner energy sources",
+                    "Implementing advanced beneficiation technologies",
+                    "Reducing emissions through better waste management"
+                ]
+            },
+            {
+                location: "Dhanbad",
+                carbonFootprint: {
+                    yearly: "1,100,000 tons",
+                    monthly: "91,667 tons",
+                    daily: "3,014 tons"
+                },
+                processes: [
+                    "Underground mining",
+                    "Coal processing",
+                    "Energy-intensive operations",
+                    "Material handling"
+                ],
+                alternatives: [
+                    "Improving underground mining techniques",
+                    "Adopting renewable energy sources",
+                    "Enhancing material handling efficiency"
+                ]
+            },
+            // Add more data entries as needed
+        ];
+
+        // Initialize chat
+        const chatBody = document.getElementById('chatBody');
+        const userInput = document.getElementById('userInput');
+        const sendBtn = document.getElementById('sendBtn');
+        const autocompleteList = document.getElementById('autocomplete-list');
+
+        // Function to display messages
+        function displayMessage(message, sender = 'bot') {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = sender === 'bot' ? 'bot-message' : 'user-message';
+            const messagePara = document.createElement('p');
+            messagePara.innerHTML = message;
+            messageDiv.appendChild(messagePara);
+            chatBody.appendChild(messageDiv);
+            chatBody.scrollTop = chatBody.scrollHeight;
+        }
+
+        // Function to handle user input
+        function handleUserInput() {
+            const input = userInput.value.trim();
+            if (input === "") return;
+            displayMessage(input, 'user');
+            userInput.value = "";
+            // Find matching location
+            const locationData = coalMineData.find(
+                item => item.location.toLowerCase() === input.toLowerCase()
+            );
+            if (locationData) {
+                // Display carbon footprint
+                let footprint = `<strong>Carbon Footprint:</strong><br>
+                                Yearly: ${locationData.carbonFootprint.yearly}<br>
+                                Monthly: ${locationData.carbonFootprint.monthly}<br>
+                                Daily: ${locationData.carbonFootprint.daily}<br><br>`;
+                // Display processes
+                footprint += `<strong>Processes Used:</strong><ul>`;
+                locationData.processes.forEach(proc => {
+                    footprint += `<li>${proc}</li>`;
+                });
+                footprint += `</ul><br>`;
+                // Display alternatives
+                                // Display alternatives
+                                footprint += `<strong>Alternative Strategies:</strong><ul>`;
+                                    locationData.alternatives.forEach(alt => {
+                                        footprint += `<li>${alt}</li>`;
+                                    });
+                                    footprint += `</ul>`;
+                                    displayMessage(footprint);
+                                } else {
+                                    displayMessage("Sorry, I couldn't find the location you're looking for. Please try another location.");
+                                }
+                            }
+                    
+                            // Function to handle autocomplete suggestions
+                            function handleAutocomplete() {
+                                const input = userInput.value.trim().toLowerCase();
+                                autocompleteList.innerHTML = "";
+                                if (!input) return;
+                                coalMineData.forEach(item => {
+                                    if (item.location.toLowerCase().startsWith(input)) {
+                                        const div = document.createElement('div');
+                                        div.innerHTML = `<strong>${item.location.substring(0, input.length)}</strong>${item.location.substring(input.length)}`;
+                                        div.addEventListener('click', function () {
+                                            userInput.value = item.location;
+                                            autocompleteList.innerHTML = "";
+                                        });
+                                        autocompleteList.appendChild(div);
+                                    }
+                                });
+                            }
+                    
+                            // Event listeners
+                            userInput.addEventListener('input', handleAutocomplete);
+                            sendBtn.addEventListener('click', handleUserInput);
+                            userInput.addEventListener('keydown', function (e) {
+                                if (e.key === 'Enter') {
+                                    handleUserInput();
+                                }
+                            });
+                        </script>
+                    </body>
+                    </html>
+                    

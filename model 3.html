@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coal Mine Carbon Neutrality Assistant</title>
+    <link rel="stylesheet" href="style3.css">
+    <!-- Link to Chart.js for data visualization -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="chat-header">
+            <h2>Coal Mine Carbon Neutrality Assistant</h2>
+        </div>
+        <div id="chat-box" class="chat-box">
+            <!-- Chat messages will appear here -->
+        </div>
+        <div class="input-container">
+            <!-- Input field with datalist -->
+            <input type="text" id="user-input" list="state-list" placeholder="Type 'start' to begin..." autocomplete="off">
+            <datalist id="state-list">
+                <!-- This will be populated dynamically by JavaScript -->
+            </datalist>
+            <button id="send-btn">Send</button>
+        </div>
+    </div>
+
+    <div class="chart-container" id="chart-container">
+        <canvas id="myChart"></canvas>
+    </div>
+
+    <script src="pro4.js"></script>
+</body>
+</html>
